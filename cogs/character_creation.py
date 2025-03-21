@@ -69,22 +69,78 @@ class CharacterCreation(commands.Cog):
         
         # Add these lists for random character data
         self.names = [
-            "Aelar", "Bryn", "Cora", "Dren", "Elara", "Finn", "Gorrim", "Halia",
-            "Ilyana", "Jorik", "Kael", "Liora", "Mira", "Nero", "Oren", "Prynn"
+            # Human Names
+            "Aldrich", "Blackwood", "Cedric", "Darius", "Edmund", "Frederick", "Gregory", "Henrik",
+            "Isabella", "Jasper", "Katherine", "Lysander", "Magnus", "Nathaniel", "Octavia", "Percival",
+            # Elven Names
+            "Aelindra", "Caelynn", "Eldrath", "Faelyn", "Galanodel", "Holimion", "Ilphukiir", "Liadon",
+            "Meliamne", "Nailo", "Siannodel", "Xiloscient", "Yaeldrin", "Zylphara",
+            # Dwarven Names
+            "Balderk", "Dankil", "Gorunn", "Holderhek", "Loderr", "Lutgehr", "Rumnaheim", "Torunn",
+            # Halfling Names
+            "Alton", "Bramble", "Corrin", "Derrick", "Eldon", "Finnan", "Garret", "Lindal",
+            # Dragonborn Names
+            "Arjhan", "Balasar", "Bharash", "Donaar", "Ghesh", "Heskan", "Kriv", "Medrash",
+            # Tiefling Names
+            "Akmenos", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech",
+            # Gnome Names
+            "Alvyn", "Boddynock", "Dimble", "Fonkin", "Gimble", "Glim", "Jellybean", "Namfoodle",
+            # Orc Names
+            "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Krusk", "Ront", "Shump",
+            # Additional Fantasy Names
+            "Azura", "Briar", "Caspian", "Drystan", "Elowen", "Faelan", "Galadriel", "Haldir",
+            "Isolde", "Jareth", "Katniss", "Legolas", "Merlin", "Nimue", "Orion", "Phoenix",
+            "Quill", "Rowan", "Seraphina", "Thorne", "Ulysses", "Vespera", "Willow", "Xanthe",
+            "Yennefer", "Zephyr", "Arwen", "Boromir", "Celeborn", "Draco", "Eowyn", "Frodo",
+            "Gimli", "Hermione", "Inigo", "Jaskier", "Kvothe", "Lyra", "Morpheus", "Neo",
+            "Oberyn", "Poe", "Quentin", "Ripley", "Sauron", "Trinity", "Ursula", "Voldemort",
+            "Wesley", "Xander", "Yvaine", "Zelda"
         ]
 
         self.backstories = [
-            "Raised by wolves in the wild forest.",
-            "Orphaned and trained by a secretive guild.",
-            "A noble's child who ran away from home.",
-            "Survived a shipwreck and washed ashore.",
-            "Born during a rare celestial event."
+            "Raised by wolves in the wild forest, learning the ways of nature.",
+            "Orphaned and trained by a secretive guild of assassins.",
+            "A noble's child who ran away from home to pursue adventure.",
+            "Survived a shipwreck and washed ashore on a mysterious island.",
+            "Born during a rare celestial event, blessed with magical powers.",
+            "Former soldier who deserted after witnessing war atrocities.",
+            "Apprentice to a powerful wizard who mysteriously disappeared.",
+            "Village healer who left home to find a cure for a deadly plague.",
+            "Cursed by an ancient artifact, seeking ways to break free.",
+            "Last survivor of a destroyed monastery, carrying ancient secrets.",
+            "Former circus performer with a mysterious magical heritage.",
+            "Exiled noble seeking to reclaim their rightful throne.",
+            "Scholar who discovered forbidden knowledge in ancient ruins.",
+            "Street urchin who discovered their innate magical abilities.",
+            "Tribal warrior chosen by ancestral spirits for a sacred quest.",
+            "Former pirate seeking redemption through noble deeds.",
+            "Merchant's child who lost everything to supernatural forces.",
+            "Raised in a cult, escaped after discovering dark truths.",
+            "Wandering storyteller collecting tales of ancient heroes.",
+            "Survivor of a dragon attack, sworn to protect others.",
+            "Former gladiator who won their freedom through combat.",
+            "Child of an interplanar romance seeking their otherworldly parent.",
+            "Hermit who received visions from their deity.",
+            "Apprentice blacksmith whose craft was enhanced by divine blessing.",
+            "Former guard who uncovered corruption in their city."
         ]
 
         self.alignments = [
             "Lawful Good", "Neutral Good", "Chaotic Good",
             "Lawful Neutral", "True Neutral", "Chaotic Neutral",
-            "Lawful Evil", "Neutral Evil", "Chaotic Evil"
+            "Lawful Evil", "Neutral Evil", "Chaotic Evil",
+            "Chaotic Good (with Lawful tendencies)",
+            "Lawful Good (with Neutral tendencies)",
+            "Neutral Good (with Chaotic tendencies)",
+            "Chaotic Neutral (with Good tendencies)",
+            "True Neutral (with Good tendencies)",
+            "Lawful Neutral (with Good tendencies)",
+            "Chaotic Neutral (with Evil tendencies)",
+            "True Neutral (with Evil tendencies)",
+            "Lawful Neutral (with Evil tendencies)",
+            "Neutral Good (with Lawful tendencies)",
+            "Neutral Evil (with Lawful tendencies)",
+            "Neutral Evil (with Chaotic tendencies)"
         ]
     
     def normalize_race(self, race):
@@ -531,17 +587,105 @@ class CharacterCreation(commands.Cog):
             "created_at": datetime.now().isoformat()
         }
 
-        # Generate ability scores (4d6 drop lowest)
+        # Define class primary abilities
+        class_primary_abilities = {
+            "Artificer": ["intelligence"],
+            "Barbarian": ["strength", "constitution"],
+            "Bard": ["charisma", "dexterity"],
+            "Cleric": ["wisdom", "constitution"],
+            "Druid": ["wisdom", "constitution"],
+            "Fighter": ["strength", "constitution"],
+            "Monk": ["dexterity", "wisdom"],
+            "Paladin": ["strength", "charisma"],
+            "Ranger": ["dexterity", "wisdom"],
+            "Rogue": ["dexterity", "intelligence"],
+            "Sorcerer": ["charisma", "constitution"],
+            "Warlock": ["charisma", "constitution"],
+            "Wizard": ["intelligence", "constitution"]
+        }
+        
+        # Define race ability bonuses (simplified)
+        race_ability_bonuses = {
+            "Human": ["all"],  # Humans get +1 to all abilities
+            "Elf": ["dexterity", "intelligence"],
+            "Dwarf": ["constitution", "wisdom"],
+            "Halfling": ["dexterity", "charisma"],
+            "Gnome": ["intelligence", "dexterity"],
+            "Dragonborn": ["strength", "charisma"],
+            "Tiefling": ["charisma", "intelligence"],
+            "Half-Elf": ["charisma", "dexterity", "intelligence"],
+            "Half-Orc": ["strength", "constitution"]
+        }
+        
+        # Generate base ability scores (standard array)
+        base_scores = [15, 14, 13, 12, 10, 8]
+        random.shuffle(base_scores)
+        
+        # Assign scores prioritizing class primary abilities
+        ability_priorities = []
+        
+        # Add class primary abilities first
+        for ability in class_primary_abilities.get(selected_class, []):
+            if ability not in ability_priorities:
+                ability_priorities.append(ability)
+        
+        # Add race bonus abilities next
+        for ability in race_ability_bonuses.get(selected_race, []):
+            if ability != "all" and ability not in ability_priorities:
+                ability_priorities.append(ability)
+        
+        # Add remaining abilities
         for ability in ability_scores:
-            rolls = [random.randint(1, 6) for _ in range(4)]
-            rolls.sort()
-            score = sum(rolls[1:])  # Drop the lowest roll
-            character_data[ability] = str(score)
-
+            if ability not in ability_priorities:
+                ability_priorities.append(ability)
+        
+        # Assign scores based on priority
+        assigned_scores = {}
+        for i, ability in enumerate(ability_priorities):
+            if i < len(base_scores):
+                assigned_scores[ability] = base_scores[i]
+            else:
+                assigned_scores[ability] = 8  # Default for any remaining abilities
+        
+        # Apply racial bonuses
+        if "all" in race_ability_bonuses.get(selected_race, []):
+            # Human gets +1 to all
+            for ability in ability_scores:
+                assigned_scores[ability] = assigned_scores.get(ability, 8) + 1
+        else:
+            # Apply +2 to primary racial ability, +1 to secondary
+            racial_bonuses = race_ability_bonuses.get(selected_race, [])
+            if racial_bonuses:
+                primary_racial = racial_bonuses[0]
+                assigned_scores[primary_racial] = assigned_scores.get(primary_racial, 8) + 2
+                
+                for secondary_racial in racial_bonuses[1:]:
+                    assigned_scores[secondary_racial] = assigned_scores.get(secondary_racial, 8) + 1
+        
+        # Ensure all abilities have a value and convert to string
+        for ability in ability_scores:
+            character_data[ability] = str(assigned_scores.get(ability, 10))
+        
         return character_data
 
     async def display_and_confirm(self, ctx, character_data, game, user_id):
         """Display character and ask for confirmation via DM"""
+        # Check if random name is already in use
+        name_in_use = False
+        for player_id, char_data in game.get("characters", {}).items():
+            if player_id != user_id and char_data.get("name", "").lower() == character_data["name"].lower():
+                name_in_use = True
+                break
+        
+        if name_in_use:
+            # Generate a new name
+            used_names = [char_data.get("name", "").lower() for player_id, char_data in game.get("characters", {}).items() 
+                         if player_id != user_id]
+            available_names = [name for name in self.names if name.lower() not in used_names]
+            
+            if available_names:
+                character_data["name"] = random.choice(available_names)
+        
         embed = discord.Embed(
             title=f"🎲 Random Character: {character_data['name']}",
             description="Here's your randomly generated character! Reply with `yes` to accept or `no` to reroll.",
