@@ -82,17 +82,38 @@ class CommandsDropdown(ui.Select):
         
     def create_dnd_embed(self):
         embed = discord.Embed(
-            title="D&D Game Commands",
-            description="Commands for Dungeons & Dragons gameplay",
-            color=discord.Color.dark_green()
+            title="🐉 D&D Game Commands",
+            description="*Commands for Dungeons & Dragons gameplay*",
+            color=discord.Color.from_rgb(53, 95, 75)  # Rich forest green
         )
+        
         embed.set_thumbnail(url="https://media.discordapp.net/attachments/1083281523383480380/1349256619162341406/42ef8567-f4f1-4dc3-83ee-ed19a5d9a013-600x600.webp")
-        embed.add_field(name="!dnd", value="Setup a new D&D session.\nExample: `!dnd`", inline=False)
-        embed.add_field(name="!dnd_status", value="Show current D&D status.\nExample: `!dnd_status`", inline=False)
-        embed.add_field(name="!end_dnd", value="End current D&D game.\nExample: `!end_dnd`", inline=False)
-        embed.add_field(name="!campaign_setup", value="Set up the campaign theme and start the adventure.\nExample: `!campaign_setup`", inline=False)
-        embed.add_field(name="!start", value="Start the D&D game by creating private IC and OOC channels.\nExample: `!start`", inline=False)
-        embed.set_footer(text="Select another category from the dropdown menu")
+        
+        # Game Setup Section
+        embed.add_field(
+            name="📜 Game Setup",
+            value="```!dnd``` ➤ Create a new D&D session\n"
+                  "```!campaign_setup``` ➤ Set up campaign theme & begin adventure\n"
+                  "```!start``` ➤ Create private IC/OOC channels",
+            inline=False
+        )
+        
+        # Game Management Section
+        embed.add_field(
+            name="⚔️ Game Management",
+            value="```!dnd_status``` ➤ View current game status\n"
+                  "```!end_dnd``` ➤ Conclude your adventure",
+            inline=False
+        )
+        
+        # Gameplay Section
+        embed.add_field(
+            name="🎲 Gameplay",
+            value="```!roll``` ➤ Roll dice for combat, checks, saves & more",
+            inline=False
+        )
+        
+        embed.set_footer(text="✨ Select another category from the dropdown menu")
         return embed
         
     def create_character_embed(self):
