@@ -573,10 +573,14 @@ class CharacterCreation(commands.Cog):
         classes = ["Artificer", "Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard"]
         ability_scores = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
 
+        # Select race and class
+        selected_race = random.choice(races)
+        selected_class = random.choice(classes)
+
         character_data = {
             "name": random.choice(self.names),
-            "class": random.choice(classes),
-            "race": random.choice(races),
+            "class": selected_class,
+            "race": selected_race,
             "backstory": random.choice(self.backstories),
             "alignment": random.choice(self.alignments),
             "level": "1",
