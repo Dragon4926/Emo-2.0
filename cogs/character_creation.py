@@ -593,57 +593,72 @@ class CharacterCreation(commands.Cog):
 
         # Define class primary abilities
         class_primary_abilities = {
-            "Artificer": ["intelligence"],
-            "Barbarian": ["strength", "constitution"],
-            "Bard": ["charisma", "dexterity"],
-            "Cleric": ["wisdom", "constitution"],
-            "Druid": ["wisdom", "constitution"],
-            "Fighter": ["strength", "constitution"],
-            "Monk": ["dexterity", "wisdom"],
-            "Paladin": ["strength", "charisma"],
-            "Ranger": ["dexterity", "wisdom"],
-            "Rogue": ["dexterity", "intelligence"],
-            "Sorcerer": ["charisma", "constitution"],
-            "Warlock": ["charisma", "constitution"],
-            "Wizard": ["intelligence", "constitution"]
+            "Artificer": ["intelligence"],  # Intelligence for spells and magical tinkering
+            "Barbarian": ["strength", "constitution"],  # Strength for attacks, Constitution for rage and HP
+            "Bard": ["charisma"],  # Charisma for spells and performances
+            "Cleric": ["wisdom"],  # Wisdom for spells and divine abilities
+            "Druid": ["wisdom"],  # Wisdom for spells and wild shape
+            "Fighter": ["strength", "dexterity"],  # Can focus on either Strength or Dexterity
+            "Monk": ["dexterity", "wisdom"],  # Dexterity for attacks, Wisdom for ki abilities
+            "Paladin": ["strength", "charisma"],  # Strength for attacks, Charisma for divine abilities
+            "Ranger": ["dexterity", "wisdom"],  # Dexterity for attacks, Wisdom for spells
+            "Rogue": ["dexterity"],  # Dexterity for attacks and skills
+            "Sorcerer": ["charisma"],  # Charisma for spells
+            "Warlock": ["charisma"],  # Charisma for spells and invocations
+            "Wizard": ["intelligence"]  # Intelligence for spells
         }
         
-        # Define race ability bonuses (simplified)
+        # Define race ability bonuses (according to D&D 5E)
         race_ability_bonuses = {
-            "Human": ["all"],  # Humans get +1 to all abilities
-            "Elf": ["dexterity", "intelligence"],
-            "Dwarf": ["constitution", "wisdom"],
-            "Halfling": ["dexterity", "charisma"],
-            "Gnome": ["intelligence", "dexterity"],
-            "Dragonborn": ["strength", "charisma"],
-            "Tiefling": ["charisma", "intelligence"],
-            "Half-Elf": ["charisma", "dexterity", "intelligence"],
-            "Half-Orc": ["strength", "constitution"]
+            "Human": ["all"],  # +1 to all abilities
+            "Elf": ["dexterity"],  # +2 Dexterity
+            "Dwarf": ["constitution"],  # +2 Constitution
+            "Halfling": ["dexterity"],  # +2 Dexterity
+            "Gnome": ["intelligence"],  # +2 Intelligence
+            "Dragonborn": ["strength", "charisma"],  # +2 Strength, +1 Charisma
+            "Tiefling": ["charisma", "intelligence"],  # +2 Charisma, +1 Intelligence
+            "Half-Elf": ["charisma", "choice", "choice"],  # +2 Charisma, +1 to two others of choice
+            "Half-Orc": ["strength", "constitution"]  # +2 Strength, +1 Constitution
         }
         
-        # Generate base ability scores (standard array)
+        # Instead of shuffling, we'll strategically assign the standard array
         base_scores = [15, 14, 13, 12, 10, 8]
-        random.shuffle(base_scores)
         
-        # Assign scores prioritizing class primary abilities
+        # Get primary abilities for the class
+        primary_abilities = class_primary_abilities.get(selected_class, [])
+        
+        # Determine if race bonuses align with class primary abilities
+        race_bonuses = race_ability_bonuses.get(selected_race, [])
+        race_bonus_abilities = [a for a in race_bonuses if a != "all" and a != "choice"]
+        
+        # Create a priority list for abilities
         ability_priorities = []
         
-        # Add class primary abilities first
-        for ability in class_primary_abilities.get(selected_class, []):
+        # First, add primary abilities that also get racial bonuses (perfect synergy)
+        for ability in primary_abilities:
+            if ability in race_bonus_abilities:
+                ability_priorities.append(ability)
+        
+        # Next, add remaining primary abilities
+        for ability in primary_abilities:
             if ability not in ability_priorities:
                 ability_priorities.append(ability)
         
-        # Add race bonus abilities next
-        for ability in race_ability_bonuses.get(selected_race, []):
-            if ability != "all" and ability not in ability_priorities:
+        # Next, add constitution if not already included (everyone needs HP)
+        if "constitution" not in ability_priorities:
+            ability_priorities.append("constitution")
+        
+        # Next, add remaining racial bonus abilities
+        for ability in race_bonus_abilities:
+            if ability not in ability_priorities:
                 ability_priorities.append(ability)
         
-        # Add remaining abilities
+        # Finally, add any remaining abilities
         for ability in ability_scores:
             if ability not in ability_priorities:
                 ability_priorities.append(ability)
         
-        # Assign scores based on priority
+        # Assign scores based on priority (highest scores to highest priority)
         assigned_scores = {}
         for i, ability in enumerate(ability_priorities):
             if i < len(base_scores):
@@ -652,19 +667,44 @@ class CharacterCreation(commands.Cog):
                 assigned_scores[ability] = 8  # Default for any remaining abilities
         
         # Apply racial bonuses
-        if "all" in race_ability_bonuses.get(selected_race, []):
+        if "all" in race_bonuses:
             # Human gets +1 to all
             for ability in ability_scores:
                 assigned_scores[ability] = assigned_scores.get(ability, 8) + 1
         else:
-            # Apply +2 to primary racial ability, +1 to secondary
-            racial_bonuses = race_ability_bonuses.get(selected_race, [])
-            if racial_bonuses:
-                primary_racial = racial_bonuses[0]
-                assigned_scores[primary_racial] = assigned_scores.get(primary_racial, 8) + 2
+            # For Half-Elf, assign "choice" bonuses to primary abilities that aren't already getting bonuses
+            if selected_race == "Half-Elf":
+                # First bonus is always +2 Charisma
+                assigned_scores["charisma"] = assigned_scores.get("charisma", 8) + 2
                 
-                for secondary_racial in racial_bonuses[1:]:
-                    assigned_scores[secondary_racial] = assigned_scores.get(secondary_racial, 8) + 1
+                # For the two +1 choices, prioritize primary abilities
+                choices_remaining = 2
+                for ability in primary_abilities:
+                    if ability != "charisma" and choices_remaining > 0:
+                        assigned_scores[ability] = assigned_scores.get(ability, 8) + 1
+                        choices_remaining -= 1
+                
+                # If we still have choices, prioritize constitution
+                if choices_remaining > 0 and "constitution" not in primary_abilities:
+                    assigned_scores["constitution"] = assigned_scores.get("constitution", 8) + 1
+                    choices_remaining -= 1
+                
+                # If we still have choices, use them on highest remaining stats
+                remaining_abilities = [a for a in ability_scores if a != "charisma" and a not in primary_abilities and a != "constitution"]
+                for ability in remaining_abilities:
+                    if choices_remaining > 0:
+                        assigned_scores[ability] = assigned_scores.get(ability, 8) + 1
+                        choices_remaining -= 1
+            else:
+                # For other races, apply standard bonuses
+                if race_bonus_abilities:
+                    # Apply +2 to primary racial ability
+                    primary_racial = race_bonus_abilities[0]
+                    assigned_scores[primary_racial] = assigned_scores.get(primary_racial, 8) + 2
+                    
+                    # Apply +1 to secondary racial abilities
+                    for secondary_racial in race_bonus_abilities[1:]:
+                        assigned_scores[secondary_racial] = assigned_scores.get(secondary_racial, 8) + 1
         
         # Ensure all abilities have a value and convert to string
         for ability in ability_scores:
