@@ -71,7 +71,8 @@ async def on_ready():
         'cogs.gemini_chat',
         'cogs.dnd_game',
         'cogs.character_creation',  # New character creation cog
-        'cogs.emo_narration'        # Emo narration cog for !emo command
+        'cogs.emo_narration',       # Emo narration cog for !emo command
+        'cogs.npc_manager'          # NPC management for D&D games
     ]
     
     for cog in cogs_to_load:

@@ -664,7 +664,7 @@ class DnDGame(commands.Cog):
             return
         
         if game["state"] != "active":
-            await ctx.send("The game hasn’t been fully set up yet. Complete the campaign setup with `!campaign_setup` first.")
+            await ctx.send("The game hasn't been fully set up yet. Complete the campaign setup with `!campaign_setup` first.")
             return
         
         # Check if all players have completed their choices
@@ -687,18 +687,22 @@ class DnDGame(commands.Cog):
                 overwrites[player] = discord.PermissionOverwrite(view_channel=True, send_messages=True)
         
         # Create private IC channel
-        ic_channel = await guild.create_text_channel(
-            name="IC Chat dnd",
-            overwrites=overwrites,
-            topic=f"In-character chat for the {game['theme']} adventure!"
-        )
-        
-        # Create OOC thread
-        ooc_thread = await ic_channel.create_thread(
-            name="OOC Chat (D&D)",
-            type=discord.ChannelType.public_thread,
-            reason="Out-of-character chat for the D&D game"
-        )
+        try:
+            ic_channel = await guild.create_text_channel(
+                name="IC Chat dnd",
+                overwrites=overwrites,
+                topic=f"In-character chat for the {game['theme']} adventure!"
+            )
+            
+            # Create OOC thread
+            ooc_thread = await ic_channel.create_thread(
+                name="OOC Chat (D&D)",
+                type=discord.ChannelType.public_thread,
+                reason="Out-of-character chat for the D&D game"
+            )
+        except discord.Forbidden:
+            await ctx.send("Error: I don't have permission to create channels. Please make sure I have the 'Manage Channels' permission in this server.")
+            return
         
         # Update game data
         game["ic_channel_id"] = str(ic_channel.id)
